@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 
 import guru.springfamework.api.v1.model.CustomerDTO;
+import guru.springfamework.controllers.RestResponseEntitiyExceptionHandler;
+import guru.springfamework.exceptions.ResourceNotFoundException;
 import guru.springfamework.services.CustomerService;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +39,8 @@ public class CustomerControllerTest extends AbstractRestControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mockMvc = MockMvcBuilders.standaloneSetup(customerController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(customerController)
+                                 .setControllerAdvice(new RestResponseEntitiyExceptionHandler()).build();
     }
 
     @Test
@@ -145,5 +148,14 @@ public class CustomerControllerTest extends AbstractRestControllerTest {
                .andExpect(status().isOk());
 
         verify(customerService).deleteCustomerById(anyLong());
+    }
+
+    @Test
+    public void getByNameNotFound() throws Exception {
+        when(customerService.getCustomerById(anyLong())).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get(CustomerController.BASE_URL + "/567")
+                                .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isNotFound());
     }
 }
