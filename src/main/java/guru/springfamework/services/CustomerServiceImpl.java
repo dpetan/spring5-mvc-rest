@@ -9,6 +9,7 @@ import guru.springfamework.controllers.v1.CustomerController;
 import guru.springfamework.domain.Customer;
 import guru.springfamework.exceptions.ResourceNotFoundException;
 import guru.springfamework.repositories.CustomerRepository;
+import guru.springfamework.utils.DtoUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -66,13 +67,8 @@ public class CustomerServiceImpl implements CustomerService {
 
         return customerRepository.findById(id).map(customer -> {
 
-            if(customerDTO.getFirstname() != null) {
-                customer.setFirstname(customerDTO.getFirstname());
-            }
-
-            if(customerDTO.getLastname() != null) {
-                customer.setLastname(customerDTO.getLastname());
-            }
+            DtoUtils.setIfNotNull(customer::setFirstname, customerDTO.getFirstname());
+            DtoUtils.setIfNotNull(customer::setLastname, customerDTO.getLastname());
 
             CustomerDTO returnDto = customerMapper.customerToCustomerDTO(customerRepository.save(customer));
 
